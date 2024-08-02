@@ -41,14 +41,12 @@ void displayPoly(struct Poly p)
     for (int j = 0; j < p.n; j++)
     {
         printf("%.2fX%d ", p.t[j].coeff, p.t[j].exp);
-        if (j != (p.n - 1) && p.t[j].coeff >= 0)
-            printf("+ ");
-        else if (p.t[j].coeff < 0)
+        if (j != (p.n - 1) && p.t[j + 1].coeff >= 0)
         {
+            printf("+ ");
         }
-        else
-            printf("\n");
     }
+    printf("\n\n");
 }
 
 // The p3 is the resultant poly made from the sum of the polys[0] and polys[1]
@@ -97,7 +95,6 @@ void polyAdd(struct Poly *polys, struct Poly *p3)
 
 void polySub(struct Poly *polys, struct Poly *p3)
 {
-    printf("I am here 5\n");
     int i = 0, j = 0, k = 0;
     p3->n = polys[0].n + polys[1].n;
     p3->t = (struct Term *)malloc(p3->n * sizeof(struct Term));
@@ -123,8 +120,13 @@ void polySub(struct Poly *polys, struct Poly *p3)
         }
         else if (polys[0].t[i].exp < polys[1].t[j].exp)
         {
+            if (i == 0)
+            {
+                p3->t[k].coeff = -polys[1].t[j].coeff;
+            } else {
+                p3->t[k].coeff = polys[1].t[j].coeff;
+            }
             p3->t[k].exp = polys[1].t[j].exp;
-            p3->t[k].coeff = polys[1].t[j].coeff;
             k++, j++;
         }
     }
@@ -181,31 +183,14 @@ void polyMul(struct Poly *polys, struct Poly *p3)
     }
 
     p3->n = k;
-
-    for (int j = 0; j < p3->n; j++)
-    {
-        printf("%fX%d ", p3->t[j].coeff, p3->t[j].exp);
-        if (j != (p3->n - 1) && p3->t[j].coeff >= 0)
-            printf("+ ");
-        else if (p3->t[j].coeff < 0)
-        {
-        }
-        else
-            printf("\n");
-    }
 }
 
-void polyDiv(struct Poly *polys, struct PolyDivRes *polyDivRes)
+int polyDiv(struct Poly *polys, struct PolyDivRes *polyDivRes)
 {
     if (polys[0].t[0].exp < polys[1].t[0].exp)
     {
         printf("Can't do division with p1 having lower power than p2!\n");
-        return;
-    }
-    else if (polys[0].t == polys[1].t)
-    {
-        printf("The result is 1!\n");
-        return;
+        return -1;
     }
 
     //  I think the difference of the two poly's exp + 1  is the number of steps needed to be taken.
@@ -223,8 +208,6 @@ void polyDiv(struct Poly *polys, struct PolyDivRes *polyDivRes)
     float coeffDiff;
     int k = 0;
 
-    printf("I am Here 1\n");
-
     for (int i = 0; i < stepNumber; i++)
     {
         expDiff = dividentCopy.t[0].exp - polys[1].t[0].exp;
@@ -234,7 +217,6 @@ void polyDiv(struct Poly *polys, struct PolyDivRes *polyDivRes)
 
         polyDivRes->q.t[k].exp = expDiff;
         polyDivRes->q.t[k].coeff = coeffDiff;
-        printf("I am here 2\n");
 
         // setting up the substractor. This is used for substracting the dividentCopy.
 
@@ -244,31 +226,24 @@ void polyDiv(struct Poly *polys, struct PolyDivRes *polyDivRes)
             substractor.t[j].exp = polys[1].t[j].exp + polyDivRes->q.t[k].exp;
         }
 
-        printf("I am here 3\n");
         // I had to do this, cause I provided the polynomials to be subbed as elements of the array earlier!
         struct Poly subPoly[2] = {dividentCopy, substractor};
         struct Poly tempRes;
 
         polySub(subPoly, &tempRes);
 
-        printf("\nstart\n");
-        displayPoly(tempRes);
-        printf("end\n\n");
-
         dividentCopy = tempRes;
-
-        printf("I am Here 4\n");
 
         k++;
     }
     free(substractor.t);
     polyDivRes->q.n = k;
     polyDivRes->r = dividentCopy;
+    return 0;
 }
 
 int main()
 {
-
     struct Poly polyAddRes, polyMulRes, polySubRes;
     struct PolyDivRes polyDivRes;
     int numberOfPoly;
@@ -311,7 +286,7 @@ int main()
     {
         polyAdd(polys, &polyAddRes);
         polySub(polys, &polySubRes);
-        printf("The resultant poly after summing = ");
+        printf("\nThe resultant poly after summing = ");
         displayPoly(polyAddRes);
         printf("The resultant poly after substraction = ");
         displayPoly(polySubRes);
@@ -319,17 +294,24 @@ int main()
         polyMul(polys, &polyMulRes);
         displayPoly(polyMulRes);
         printf("The resultant poly after division = ");
-        polyDiv(polys, &polyDivRes);
-        printf("Quotient => \n");
-        displayPoly(polyDivRes.q);
-        printf("Remainder =>\n");
-        displayPoly(polyDivRes.r);
+
+        // When the polyDiv returns without anything it then calls the displayPoly with polyDivRes,which has garbage value.This can
+        // some random errors so that is why we are doing a check here to make sure the appropriate condition is met!
+
+        if (polyDiv(polys, &polyDivRes) == 0)
+        {
+            printf("Quotient => \n");
+            displayPoly(polyDivRes.q);
+            printf("Remainder =>\n");
+            displayPoly(polyDivRes.r);
+            free(polyDivRes.q.t);
+            free(polyDivRes.r.t);
+        }
     }
 
     free(polySubRes.t);
     free(polyAddRes.t);
     free(polyMulRes.t);
-    free(polyDivRes.q.t);
-    free(polyDivRes.r.t);
+
     free(polys);
 }
