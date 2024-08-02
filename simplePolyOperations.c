@@ -309,15 +309,15 @@ int main()
     }
     else
     {
-        // polyAdd(polys, &polyAddRes);
-        // polySub(polys, &polySubRes);
-        // printf("The resultant poly after summing = ");
-        // displayPoly(polyAddRes);
-        // printf("The resultant poly after substraction = ");
-        // displayPoly(polySubRes);
-        // printf("The resultant poly after multiplication = ");
-        // polyMul(polys, &polyMulRes);
-        // displayPoly(polyMulRes);
+        polyAdd(polys, &polyAddRes);
+        polySub(polys, &polySubRes);
+        printf("The resultant poly after summing = ");
+        displayPoly(polyAddRes);
+        printf("The resultant poly after substraction = ");
+        displayPoly(polySubRes);
+        printf("The resultant poly after multiplication = ");
+        polyMul(polys, &polyMulRes);
+        displayPoly(polyMulRes);
         printf("The resultant poly after division = ");
         polyDiv(polys, &polyDivRes);
         printf("Quotient => \n");
@@ -326,9 +326,9 @@ int main()
         displayPoly(polyDivRes.r);
     }
 
-    // free(polySubRes.t);
-    // free(polyAddRes.t);
-    // free(polyMulRes.t);
+    free(polySubRes.t);
+    free(polyAddRes.t);
+    free(polyMulRes.t);
     free(polyDivRes.q.t);
     free(polyDivRes.r.t);
     free(polys);
