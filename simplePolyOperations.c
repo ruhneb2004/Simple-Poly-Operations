@@ -123,7 +123,9 @@ void polySub(struct Poly *polys, struct Poly *p3)
             if (i == 0)
             {
                 p3->t[k].coeff = -polys[1].t[j].coeff;
-            } else {
+            }
+            else
+            {
                 p3->t[k].coeff = polys[1].t[j].coeff;
             }
             p3->t[k].exp = polys[1].t[j].exp;
@@ -293,7 +295,7 @@ int main()
         printf("The resultant poly after multiplication = ");
         polyMul(polys, &polyMulRes);
         displayPoly(polyMulRes);
-        printf("The resultant poly after division = ");
+        printf("The resultant poly after division\n ");
 
         // When the polyDiv returns without anything it then calls the displayPoly with polyDivRes,which has garbage value.This can
         // some random errors so that is why we are doing a check here to make sure the appropriate condition is met!
